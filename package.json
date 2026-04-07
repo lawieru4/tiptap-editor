@@ -1,0 +1,53 @@
+{
+  "name": "tiptap-editor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "type-check": "vue-tsc -b",
+    "preview": "vite preview",
+    "clean": "rimraf node_modules dist pnpm-lock.yaml",
+    "reinstall": "npm run clean && pnpm install"
+  },
+  "dependencies": {
+    "@primevue/themes": "^4.0.0",
+    "@tiptap/core": "^3.22.2",
+    "@tiptap/extension-image": "^3.22.2",
+    "@tiptap/extension-link": "^3.22.2",
+    "@tiptap/extension-placeholder": "^3.22.2",
+    "@tiptap/extension-subscript": "^3.22.2",
+    "@tiptap/extension-superscript": "^3.22.2",
+    "@tiptap/extension-task-item": "^3.22.2",
+    "@tiptap/extension-task-list": "^3.22.2",
+    "@tiptap/extension-text-align": "^3.22.2",
+    "@tiptap/extension-underline": "^3.22.2",
+    "@tiptap/pm": "^3.22.2",
+    "@tiptap/starter-kit": "^3.22.2",
+    "@tiptap/vue-3": "^3.22.2",
+    "@vueuse/core": "^10.0.0",
+    "axios": "^1.7.0",
+    "lucide-vue-next": "^1.0.0",
+    "pinia": "^2.2.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.0.0",
+    "vue": "^3.5.0",
+    "vue-hooks-plus": "^2.0.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^22.0.0",
+    "@vitejs/plugin-vue": "^5.1.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "rimraf": "^6.1.2",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0",
+    "vite-plugin-compression": "^0.5.1",
+    "vue-tsc": "^2.1.0"
+  }
+}
