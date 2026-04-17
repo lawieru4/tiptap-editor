@@ -23,6 +23,7 @@ import ImageUpload from '@/extensions/ImageUpload'
 const props = withDefaults(defineProps<{
   modelValue: string
   height?: number | string
+  onUploadImg?: (file: File) => Promise<string>
 }>(), {
   height: 500
 })
@@ -59,7 +60,9 @@ const editor = useEditor({
       inline: true,
       allowBase64: true,
     }),
-    ImageUpload,
+    ImageUpload.configure({
+      uploadFn: props.onUploadImg
+    }),
   ],
   onUpdate: ({ editor }) => {
     emit('update:modelValue', editor.getHTML())

@@ -2,12 +2,22 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import ImageUploadComponent from '@/components/ImageUploadNode.vue'
 
-export default Node.create({
+export interface ImageUploadOptions {
+  uploadFn?: (file: File) => Promise<string>
+}
+
+export default Node.create<ImageUploadOptions>({
   name: 'imageUpload',
 
   group: 'block',
 
   atom: true,
+
+  addOptions() {
+    return {
+      uploadFn: undefined,
+    }
+  },
 
   parseHTML() {
     return [
@@ -25,3 +35,4 @@ export default Node.create({
     return VueNodeViewRenderer(ImageUploadComponent)
   },
 })
+
