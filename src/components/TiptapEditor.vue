@@ -132,31 +132,31 @@ onClickOutside(listMenuRef, () => {
 <template>
   <div :class="['relative w-full max-w-5xl mx-auto rounded-xl overflow-hidden shadow-2xl flex flex-col', isDark ? 'bg-[#111111] border border-zinc-800' : 'bg-white border border-zinc-200 light-wrapper']">
     <div v-if="editor" :class="['sticky top-0 z-[50] flex flex-wrap items-center gap-1 p-2 border-b toolbar-container transition-colors', isDark ? 'border-zinc-800 bg-[#18181b] text-zinc-400' : 'border-zinc-200 bg-[#f4f4f5] text-zinc-500']">
-      <button @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
+      <button @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()" v-tooltip.top="'撤销'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
         <Undo2 :size="16" />
       </button>
-      <button @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
+      <button @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()" v-tooltip.top="'重做'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
         <Redo2 :size="16" />
       </button>
 
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
 
       <div class="relative" ref="headingMenuRef">
-        <button @click="isHeadingMenuOpen = !isHeadingMenuOpen" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading') }" class="flex items-center gap-1 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+        <button @click="isHeadingMenuOpen = !isHeadingMenuOpen" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading') }" v-tooltip.top="'标题'" class="flex items-center gap-1 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
           <Heading :size="16" />
           <ChevronDown :size="12" class="opacity-70" />
         </button>
         <div v-show="isHeadingMenuOpen" class="absolute top-full left-0 mt-1 min-w-[130px] bg-[#1a1a1e]/95 backdrop-blur shadow-2xl border border-zinc-700/60 rounded-lg p-1 z-[100] text-sm flex flex-col gap-0.5">
-          <button @click="editor.chain().focus().toggleHeading({ level: 1 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 1 }) }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
+          <button @click="editor.chain().focus().toggleHeading({ level: 1 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 1 }) }" v-tooltip.top="'标题 1'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
             <Heading1 :size="16" /> Heading 1
           </button>
-          <button @click="editor.chain().focus().toggleHeading({ level: 2 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 2 }) }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
+          <button @click="editor.chain().focus().toggleHeading({ level: 2 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 2 }) }" v-tooltip.top="'标题 2'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
             <Heading2 :size="16" /> Heading 2
           </button>
-          <button @click="editor.chain().focus().toggleHeading({ level: 3 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 3 }) }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
+          <button @click="editor.chain().focus().toggleHeading({ level: 3 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 3 }) }" v-tooltip.top="'标题 3'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
             <Heading3 :size="16" /> Heading 3
           </button>
-          <button @click="editor.chain().focus().toggleHeading({ level: 4 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 4 }) }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
+          <button @click="editor.chain().focus().toggleHeading({ level: 4 }).run(); isHeadingMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('heading', { level: 4 }) }" v-tooltip.top="'标题 4'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full">
             <Heading4 :size="16" /> Heading 4
           </button>
         </div>
@@ -165,52 +165,52 @@ onClickOutside(listMenuRef, () => {
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
 
       <div class="relative" ref="listMenuRef">
-        <button @click="isListMenuOpen = !isListMenuOpen" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList') }" class="flex items-center gap-1 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+        <button @click="isListMenuOpen = !isListMenuOpen" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bulletList') || editor.isActive('orderedList') || editor.isActive('taskList') }" v-tooltip.top="'列表'" class="flex items-center gap-1 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
           <List :size="16" />
           <ChevronDown :size="12" class="opacity-70" />
         </button>
         <div v-show="isListMenuOpen" class="absolute top-full left-0 mt-1 min-w-[130px] bg-[#1a1a1e]/95 backdrop-blur shadow-2xl border border-zinc-700/60 rounded-lg p-1 z-[100] text-sm flex flex-col gap-0.5">
-          <button @click="editor.chain().focus().toggleBulletList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bulletList') }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+          <button @click="editor.chain().focus().toggleBulletList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bulletList') }" v-tooltip.top="'项目列表'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
             <List :size="16" /> Bullet List
           </button>
-          <button @click="editor.chain().focus().toggleOrderedList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('orderedList') }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+          <button @click="editor.chain().focus().toggleOrderedList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('orderedList') }" v-tooltip.top="'有序列表'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
             <ListOrdered :size="16" /> Ordered List
           </button>
-          <button @click="editor.chain().focus().toggleTaskList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('taskList') }" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+          <button @click="editor.chain().focus().toggleTaskList().run(); isListMenuOpen = false" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('taskList') }" v-tooltip.top="'任务列表'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
             <ListTodo :size="16" /> Task List
           </button>
         </div>
       </div>
-      <button @click="editor.chain().focus().toggleBlockquote().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('blockquote') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleBlockquote().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('blockquote') }" v-tooltip.top="'引用'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Quote :size="16" />
       </button>
       
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
 
-      <button @click="editor.chain().focus().toggleBold().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bold') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleBold().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('bold') }" v-tooltip.top="'加粗'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Bold :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('italic') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('italic') }" v-tooltip.top="'斜体'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Italic :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('strike') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('strike') }" v-tooltip.top="'删除线'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Strikethrough :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleCode().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('code') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleCode().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('code') }" v-tooltip.top="'行内代码'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Code :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('codeBlock') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('codeBlock') }" v-tooltip.top="'代码块'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <FileCode :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('underline') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('underline') }" v-tooltip.top="'下划线'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <UnderlineIcon :size="16" />
       </button>
-      <button @click="editor.chain().focus().clearNodes().unsetAllMarks().run()" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().clearNodes().unsetAllMarks().run()" v-tooltip.top="'清除格式'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <Eraser :size="16" />
       </button>
 
       <div class="relative" ref="linkMenuRef">
-        <button @click="openLinkMenu" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('link') || isLinkMenuOpen }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+        <button @click="openLinkMenu" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('link') || isLinkMenuOpen }" v-tooltip.top="'链接'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
           <LinkIcon :size="16" />
         </button>
         <div v-show="isLinkMenuOpen" class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-[#1a1a1e]/95 backdrop-blur shadow-2xl border border-zinc-700/60 rounded-xl p-1.5 z-[100] flex items-center gap-1">
@@ -221,16 +221,16 @@ onClickOutside(listMenuRef, () => {
             placeholder="Paste a link..." 
             class="flex-1 bg-transparent border-none outline-none text-zinc-200 text-sm px-2 placeholder:text-zinc-500 min-w-0"
           />
-          <button @click="applyLink" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+          <button @click="applyLink" v-tooltip.top="'应用链接'" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
             <CornerDownLeft :size="14" />
           </button>
           
           <div class="w-px h-4 bg-zinc-700 mx-1"></div>
           
-          <button @click="openExternal" :disabled="!linkUrl" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
+          <button @click="openExternal" :disabled="!linkUrl" v-tooltip.top="'在新窗口打开'" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-50 transition-colors">
             <ExternalLink :size="14" />
           </button>
-          <button @click="removeLink" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-red-400 transition-colors">
+          <button @click="removeLink" v-tooltip.top="'删除链接'" class="p-1.5 rounded text-zinc-400 hover:bg-zinc-800 hover:text-red-400 transition-colors">
             <Trash :size="14" />
           </button>
         </div>
@@ -238,36 +238,36 @@ onClickOutside(listMenuRef, () => {
 
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
 
-      <button @click="editor.chain().focus().toggleSubscript().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('subscript') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleSubscript().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('subscript') }" v-tooltip.top="'下标'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <SubscriptIcon :size="16" />
       </button>
-      <button @click="editor.chain().focus().toggleSuperscript().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('superscript') }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().toggleSuperscript().run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('superscript') }" v-tooltip.top="'上标'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <SuperscriptIcon :size="16" />
       </button>
 
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
 
-      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'left' }) }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'left' }) }" v-tooltip.top="'左对齐'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <AlignLeft :size="16" />
       </button>
-      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'center' }) }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'center' }) }" v-tooltip.top="'居中对齐'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <AlignCenter :size="16" />
       </button>
-      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'right' }) }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'right' }) }" v-tooltip.top="'右对齐'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <AlignRight :size="16" />
       </button>
-      <button @click="editor.chain().focus().setTextAlign('justify').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'justify' }) }" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+      <button @click="editor.chain().focus().setTextAlign('justify').run()" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive({ textAlign: 'justify' }) }" v-tooltip.top="'两端对齐'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
         <AlignJustify :size="16" />
       </button>
 
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
       
-      <button @click="editor.chain().focus().insertContent({ type: 'imageUpload' }).run()" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 flex items-center gap-1 transition-colors">
+      <button @click="editor.chain().focus().insertContent({ type: 'imageUpload' }).run()" v-tooltip.top="'添加图片'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 flex items-center gap-1 transition-colors">
         <ImagePlus :size="16" /> <span class="text-xs font-semibold">Add</span>
       </button>
 
       <div class="flex-1"></div>
-      <button @click="toggleTheme" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors mr-2">
+      <button @click="toggleTheme" v-tooltip.top="'切换主题'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors mr-2">
         <MoonStar v-if="isDark" :size="16" />
         <Sun v-else :size="16" />
       </button>
