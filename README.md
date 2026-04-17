@@ -8,7 +8,7 @@
   - 基础文本格式（粗体、斜体、下划线等）
   - 标题、引用、代码块
   - 任务列表（Task List）
-  - 图片上传与管理
+  - 图片、视频上传与进度条展现
   - 链接管理
   - 文本对齐
 - **Vue 3.5+**: 利用最新的 Composition API, `defineModel`, `props destructuring` 等特性。
@@ -150,12 +150,12 @@ const handleContentChange = (html: string) => {
 - ✅ **标题**: H1 - H6
 - ✅ **列表**: 有序列表、无序列表、任务列表
 - ✅ **代码**: 代码块、内联代码
-- ✅ **媒体**: 图片上传与管理
+- ✅ **媒体**: 图片/视频上传与管理 (支持交互提示与拖拽)
 - ✅ **其他**: 链接、引用、水平线、文本对齐
 
 ### 自定义扩展
 
-在 `src/extensions/` 目录下创建自定义扩展，例如图片上传：
+在 `src/extensions/` 目录下创建自定义扩展，例如图片和视频上传：
 
 ```typescript
 // src/extensions/ImageUpload.ts
@@ -166,6 +166,39 @@ export const ImageUpload = Node.create({
   group: 'block',
   // ... 扩展配置
 })
+```
+
+### 上传图片与视频 (支持进度条)
+
+编辑器已经原生支持了拖拽、点击上传图片和视频，并且提供了上传进度条的 UI 表现。
+你只需要在使用 `TiptapEditor` 时传入自定义的上传函数（触手）即可，该函数负责将文件上传到你的 OSS 或服务器，并返回资源的外网 URL。
+
+```vue
+<template>
+  <TiptapEditor 
+    v-model="editorContent" 
+    :onUploadImg="handleImageUpload"
+    :onUploadVideo="handleVideoUpload"
+  />
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const editorContent = ref('')
+
+const handleImageUpload = async (file: File, onProgress: (progress: number) => void): Promise<string> => {
+  // 1. 发起你的上传请求 (如 axios)
+  // 2. 在请求过程中的 onUploadProgress 回调里调用 onProgress(percent) 更新进度条
+  // 3. 上传完成后返回图片的 URL
+  return 'https://your-oss.com/image.png'
+}
+
+const handleVideoUpload = async (file: File, onProgress: (progress: number) => void): Promise<string> => {
+  // 同上，返回视频的 URL
+  return 'https://your-oss.com/video.mp4'
+}
+</script>
 ```
 
 ## 🔒 认证与权限

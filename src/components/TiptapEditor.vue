@@ -9,11 +9,15 @@ import Link from '@tiptap/extension-link'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableCell } from '@tiptap/extension-table-cell'
 import {
   Undo2, Redo2, Heading, Heading1, Heading2, Heading3, Heading4, List, ListOrdered, ListTodo, Bold, Italic, 
   Strikethrough, Code, Underline as UnderlineIcon, Eraser, Link as LinkIcon, 
   Subscript as SubscriptIcon, Superscript as SuperscriptIcon, AlignLeft, 
-  AlignCenter, AlignRight, AlignJustify, MoonStar, Sun, Quote, FileCode, ChevronDown, CornerDownLeft, ExternalLink, Trash, ImagePlus, Video as VideoIcon
+  AlignCenter, AlignRight, AlignJustify, MoonStar, Sun, Quote, FileCode, ChevronDown, CornerDownLeft, ExternalLink, Trash, ImagePlus, Video as VideoIcon, Table as TableIcon
 } from 'lucide-vue-next'
 import { onBeforeUnmount, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
@@ -70,6 +74,12 @@ const editor = useEditor({
     VideoUpload.configure({
       uploadFn: props.onUploadVideo
     }),
+    Table.configure({
+      resizable: true,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
   ],
   onUpdate: ({ editor }) => {
     emit('update:modelValue', editor.getHTML())
@@ -136,6 +146,41 @@ const isListMenuOpen = ref(false)
 onClickOutside(listMenuRef, () => {
   isListMenuOpen.value = false
 })
+
+const tableMenuRef = ref(null)
+const isTableMenuOpen = ref(false)
+const selectedGridRows = ref(0)
+const selectedGridCols = ref(0)
+onClickOutside(tableMenuRef, () => {
+  isTableMenuOpen.value = false
+  selectedGridRows.value = 0
+  selectedGridCols.value = 0
+})
+
+const contextMenuRef = ref(null)
+const isContextMenuOpen = ref(false)
+const contextMenuPosition = ref({ x: 0, y: 0 })
+
+onClickOutside(contextMenuRef, () => {
+  isContextMenuOpen.value = false
+})
+
+const handleContextMenu = (e: MouseEvent) => {
+  if (!editor.value) return
+  
+  const pos = editor.value.view.posAtCoords({ left: e.clientX, top: e.clientY })
+  if (pos && pos.pos !== null) {
+    // Synchronously check if the target is within a table to prevent default browser menu
+    if ((e.target as HTMLElement).closest('table')) {
+      e.preventDefault()
+      editor.value.commands.setTextSelection(pos.pos)
+      isContextMenuOpen.value = true
+      contextMenuPosition.value = { x: e.clientX, y: e.clientY }
+    } else {
+      isContextMenuOpen.value = false
+    }
+  }
+}
 
 </script>
 
@@ -272,6 +317,70 @@ onClickOutside(listMenuRef, () => {
 
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
       
+      <div class="relative" ref="tableMenuRef">
+        <button @click="isTableMenuOpen = !isTableMenuOpen" :class="{ 'bg-zinc-800 text-zinc-100': editor.isActive('table') }" v-tooltip.top="'表格'" class="flex items-center gap-1 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+          <TableIcon :size="16" />
+          <ChevronDown :size="12" class="opacity-70" />
+        </button>
+        <div v-show="isTableMenuOpen" class="absolute top-full left-0 mt-1 min-w-[160px] bg-[#1a1a1e]/95 backdrop-blur shadow-2xl border border-zinc-700/60 rounded-lg p-1 z-[100] text-sm flex flex-col gap-0.5">
+          <template v-if="!editor.isActive('table')">
+            <div class="px-2 py-1.5 flex flex-col items-center">
+              <div class="text-xs font-medium mb-1.5 transition-colors self-start" :class="selectedGridRows > 0 ? 'text-indigo-400' : 'text-zinc-400'">
+                {{ selectedGridRows > 0 && selectedGridCols > 0 ? `${selectedGridRows} × ${selectedGridCols} 表格` : '插入表格' }}
+              </div>
+              <div class="flex flex-col gap-0.5 w-fit" @mouseleave="selectedGridRows = 0; selectedGridCols = 0">
+                <div v-for="r in 9" :key="'r-'+r" class="flex gap-0.5">
+                  <div 
+                    v-for="c in 16" 
+                    :key="'c-'+c"
+                    @mouseover="selectedGridRows = r; selectedGridCols = c"
+                    @click="editor.chain().focus().insertTable({ rows: r, cols: c, withHeaderRow: true }).run(); isTableMenuOpen = false; selectedGridRows = 0; selectedGridCols = 0"
+                    :class="[
+                      'w-3.5 h-3.5 border rounded-[2px] cursor-pointer transition-all duration-75',
+                      (r <= selectedGridRows && c <= selectedGridCols) ? 'bg-indigo-500/80 border-indigo-500/80' : 'border-zinc-500/40 table-grid-cell hover:border-zinc-400'
+                    ]"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+          <template v-if="editor.isActive('table')">
+            <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+            <button @click="editor.chain().focus().addColumnBefore().run(); isTableMenuOpen = false" v-tooltip.top="'在左侧插入列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Add Column Before
+            </button>
+            <button @click="editor.chain().focus().addColumnAfter().run(); isTableMenuOpen = false" v-tooltip.top="'在右侧插入列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Add Column After
+            </button>
+            <button @click="editor.chain().focus().deleteColumn().run(); isTableMenuOpen = false" v-tooltip.top="'删除当前列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-red-400 transition-colors text-left w-full whitespace-nowrap">
+              Delete Column
+            </button>
+            <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+            <button @click="editor.chain().focus().addRowBefore().run(); isTableMenuOpen = false" v-tooltip.top="'在上方插入行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Add Row Before
+            </button>
+            <button @click="editor.chain().focus().addRowAfter().run(); isTableMenuOpen = false" v-tooltip.top="'在下方插入行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Add Row After
+            </button>
+            <button @click="editor.chain().focus().deleteRow().run(); isTableMenuOpen = false" v-tooltip.top="'删除当前行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-red-400 transition-colors text-left w-full whitespace-nowrap">
+              Delete Row
+            </button>
+            <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+            <button @click="editor.chain().focus().mergeCells().run(); isTableMenuOpen = false" v-tooltip.top="'合并单元格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Merge Cells
+            </button>
+            <button @click="editor.chain().focus().splitCell().run(); isTableMenuOpen = false" v-tooltip.top="'拆分单元格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap">
+              Split Cell
+            </button>
+            <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+            <button @click="editor.chain().focus().deleteTable().run(); isTableMenuOpen = false" v-tooltip.top="'删除整个表格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-red-500/20 hover:text-red-400 text-red-500 transition-colors text-left w-full whitespace-nowrap">
+              Delete Table
+            </button>
+          </template>
+        </div>
+      </div>
+
       <button @click="editor.chain().focus().insertContent({ type: 'imageUpload' }).run()" v-tooltip.top="'添加图片'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 flex items-center gap-1 transition-colors">
         <ImagePlus :size="16" /> <span class="text-xs font-semibold">Image</span>
       </button>
@@ -288,13 +397,75 @@ onClickOutside(listMenuRef, () => {
     </div>
 
     <!-- The actual editor container -->
-    <div :style="{ height: typeof props.height === 'number' ? `${props.height}px` : props.height }" :class="['relative overflow-y-auto w-full editor-inner resize-y min-h-[200px]', isDark ? 'bg-[#111111]' : 'bg-white']">
+    <div :style="{ height: typeof props.height === 'number' ? `${props.height}px` : props.height }" @contextmenu="handleContextMenu" :class="['relative overflow-y-auto w-full editor-inner resize-y min-h-[200px]', isDark ? 'bg-[#111111]' : 'bg-white']">
       <editor-content :editor="editor" class="h-full" />
+    </div>
+
+    <!-- Table Context Menu -->
+    <div 
+      v-if="isContextMenuOpen"
+      ref="contextMenuRef"
+      :style="{ top: `${contextMenuPosition.y}px`, left: `${contextMenuPosition.x}px` }"
+      :class="['fixed z-[9999] min-w-[160px] shadow-2xl border rounded-lg p-1 text-sm flex flex-col gap-0.5', isDark ? 'bg-[#1a1a1e]/95 backdrop-blur border-zinc-700/60' : 'bg-white/95 backdrop-blur border-zinc-300 light-wrapper context-menu-wrapper']"
+    >
+      <button @click="editor.chain().focus().addColumnBefore().run(); isContextMenuOpen = false" v-tooltip.right="'在左侧插入列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Add Column Before
+      </button>
+      <button @click="editor.chain().focus().addColumnAfter().run(); isContextMenuOpen = false" v-tooltip.right="'在右侧插入列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Add Column After
+      </button>
+      <button @click="editor.chain().focus().deleteColumn().run(); isContextMenuOpen = false" v-tooltip.right="'删除当前列'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-red-400 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Delete Column
+      </button>
+      <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+      <button @click="editor.chain().focus().addRowBefore().run(); isContextMenuOpen = false" v-tooltip.right="'在上方插入行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Add Row Before
+      </button>
+      <button @click="editor.chain().focus().addRowAfter().run(); isContextMenuOpen = false" v-tooltip.right="'在下方插入行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Add Row After
+      </button>
+      <button @click="editor.chain().focus().deleteRow().run(); isContextMenuOpen = false" v-tooltip.right="'删除当前行'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-red-400 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Delete Row
+      </button>
+      <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+      <button @click="editor.chain().focus().mergeCells().run(); isContextMenuOpen = false" v-tooltip.right="'合并单元格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Merge Cells
+      </button>
+      <button @click="editor.chain().focus().splitCell().run(); isContextMenuOpen = false" v-tooltip.right="'拆分单元格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 transition-colors text-left w-full whitespace-nowrap text-zinc-300">
+        Split Cell
+      </button>
+      <div class="h-px bg-zinc-700 my-1 mx-1"></div>
+      <button @click="editor.chain().focus().deleteTable().run(); isContextMenuOpen = false" v-tooltip.right="'删除整个表格'" class="flex items-center gap-2 p-1.5 rounded hover:bg-red-500/20 hover:text-red-400 text-red-500 transition-colors text-left w-full whitespace-nowrap">
+        Delete Table
+      </button>
     </div>
   </div>
 </template>
 
 <style>
+/* Fix table selection issue on right click */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+.light-wrapper .context-menu-wrapper {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #d4d4d8 !important;
+}
+.light-wrapper .context-menu-wrapper button.text-zinc-300 {
+  color: #71717a !important;
+}
+.light-wrapper .context-menu-wrapper button:hover {
+  background-color: #e4e4e7 !important;
+  color: #18181b !important;
+}
+.light-wrapper .context-menu-wrapper .h-px {
+  background-color: #d4d4d8 !important;
+}
 /* Base typography inside the editor */
 .editor-inner .ProseMirror {
   color: #e5e5e5;
@@ -364,6 +535,40 @@ onClickOutside(listMenuRef, () => {
 .editor-inner .ProseMirror ul[data-type="taskList"] li > div > p {
   margin: 0;
 }
+.editor-inner .ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+.editor-inner .ProseMirror table td,
+.editor-inner .ProseMirror table th {
+  min-width: 1em;
+  border: 1px solid #3f3f46;
+  padding: 8px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+.editor-inner .ProseMirror table th {
+  font-weight: 500;
+  text-align: left;
+  background-color: #27272a;
+}
+.editor-inner .ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: #6366f1;
+  pointer-events: none;
+}
+.editor-inner .ProseMirror table p {
+  margin: 0;
+}
 .editor-inner .ProseMirror hr {
   border: none;
   border-top: 1px solid #27272a;
@@ -405,9 +610,22 @@ onClickOutside(listMenuRef, () => {
 .light-wrapper .editor-inner .ProseMirror h4 {
   color: #09090b !important;
 }
+.light-wrapper .editor-inner .ProseMirror table td,
+.light-wrapper .editor-inner .ProseMirror table th {
+  border-color: #d4d4d8 !important;
+}
+.light-wrapper .editor-inner .ProseMirror table th {
+  background-color: #f4f4f5 !important;
+}
 .light-wrapper .editor-inner .ProseMirror blockquote {
   border-left-color: #d4d4d8 !important;
   color: #71717a !important;
+}
+.light-wrapper .table-grid-cell {
+  border-color: #d4d4d8 !important;
+}
+.light-wrapper .table-grid-cell:hover {
+  border-color: #71717a !important;
 }
 .light-wrapper .editor-inner .ProseMirror pre {
   background: #f4f4f5 !important;
