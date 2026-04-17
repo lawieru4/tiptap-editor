@@ -13,17 +13,20 @@ import {
   Undo2, Redo2, Heading, Heading1, Heading2, Heading3, Heading4, List, ListOrdered, ListTodo, Bold, Italic, 
   Strikethrough, Code, Underline as UnderlineIcon, Eraser, Link as LinkIcon, 
   Subscript as SubscriptIcon, Superscript as SuperscriptIcon, AlignLeft, 
-  AlignCenter, AlignRight, AlignJustify, MoonStar, Sun, Quote, FileCode, ChevronDown, CornerDownLeft, ExternalLink, Trash, ImagePlus
+  AlignCenter, AlignRight, AlignJustify, MoonStar, Sun, Quote, FileCode, ChevronDown, CornerDownLeft, ExternalLink, Trash, ImagePlus, Video as VideoIcon
 } from 'lucide-vue-next'
 import { onBeforeUnmount, ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import Image from '@tiptap/extension-image'
 import ImageUpload from '@/extensions/ImageUpload'
+import VideoUpload from '@/extensions/VideoUpload'
+import Video from '@/extensions/Video'
 
 const props = withDefaults(defineProps<{
   modelValue: string
   height?: number | string
-  onUploadImg?: (file: File) => Promise<string>
+  onUploadImg?: (file: File, onProgress: (progress: number) => void) => Promise<string>
+  onUploadVideo?: (file: File, onProgress: (progress: number) => void) => Promise<string>
 }>(), {
   height: 500
 })
@@ -62,6 +65,10 @@ const editor = useEditor({
     }),
     ImageUpload.configure({
       uploadFn: props.onUploadImg
+    }),
+    Video,
+    VideoUpload.configure({
+      uploadFn: props.onUploadVideo
     }),
   ],
   onUpdate: ({ editor }) => {
@@ -266,7 +273,11 @@ onClickOutside(listMenuRef, () => {
       <div class="w-px h-5 bg-zinc-800 mx-1"></div>
       
       <button @click="editor.chain().focus().insertContent({ type: 'imageUpload' }).run()" v-tooltip.top="'添加图片'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 flex items-center gap-1 transition-colors">
-        <ImagePlus :size="16" /> <span class="text-xs font-semibold">Add</span>
+        <ImagePlus :size="16" /> <span class="text-xs font-semibold">Image</span>
+      </button>
+
+      <button @click="editor.chain().focus().insertContent({ type: 'videoUpload' }).run()" v-tooltip.top="'添加视频'" class="p-1.5 rounded hover:bg-zinc-800 hover:text-zinc-100 flex items-center gap-1 transition-colors">
+        <VideoIcon :size="16" /> <span class="text-xs font-semibold">Video</span>
       </button>
 
       <div class="flex-1"></div>

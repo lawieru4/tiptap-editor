@@ -1,13 +1,13 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
-import ImageUploadComponent from '@/components/ImageUploadNode.vue'
+import VideoUploadComponent from '@/components/VideoUploadNode.vue'
 
-export interface ImageUploadOptions {
+export interface VideoUploadOptions {
   uploadFn?: (file: File, onProgress: (progress: number) => void) => Promise<string>
 }
 
-export default Node.create<ImageUploadOptions>({
-  name: 'imageUpload',
+export default Node.create<VideoUploadOptions>({
+  name: 'videoUpload',
 
   group: 'block',
 
@@ -22,17 +22,16 @@ export default Node.create<ImageUploadOptions>({
   parseHTML() {
     return [
       {
-        tag: 'image-upload',
+        tag: 'video-upload',
       },
     ]
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['image-upload', mergeAttributes(HTMLAttributes)]
+    return ['video-upload', mergeAttributes(HTMLAttributes)]
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(ImageUploadComponent)
+    return VueNodeViewRenderer(VideoUploadComponent)
   },
 })
-

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
-import { CloudUpload } from 'lucide-vue-next'
+import { Film } from 'lucide-vue-next'
 
 const props = defineProps(nodeViewProps)
 
@@ -15,7 +15,7 @@ const triggerUpload = () => {
   fileInput.value?.click()
 }
 
-const replaceNodeWithImage = (src: string) => {
+const replaceNodeWithVideo = (src: string) => {
   const { editor, getPos } = props
   const pos = typeof getPos === 'function' ? getPos() : undefined
   
@@ -25,7 +25,7 @@ const replaceNodeWithImage = (src: string) => {
       .focus()
       .deleteRange({ from: pos, to: pos + 1 })
       .insertContentAt(pos, {
-        type: 'image',
+        type: 'video',
         attrs: { src }
       })
       .run()
@@ -33,7 +33,7 @@ const replaceNodeWithImage = (src: string) => {
 }
 
 const processFile = async (file: File) => {
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith('video/')) {
     const uploadFn = props.extension.options.uploadFn
     if (uploadFn) {
       isUploading.value = true
@@ -43,20 +43,20 @@ const processFile = async (file: File) => {
           uploadProgress.value = progress
         })
         if (url) {
-          replaceNodeWithImage(url)
+          replaceNodeWithVideo(url)
         }
       } catch (error) {
-        console.error('Image upload failed:', error)
+        console.error('Video upload failed:', error)
       } finally {
         isUploading.value = false
       }
     } else {
-      // Fallback to base64
+      // Fallback to base64 (not recommended for large videos, but supported)
       const reader = new FileReader()
       reader.onload = (e) => {
         const src = e.target?.result
         if (src && typeof src === 'string') {
-          replaceNodeWithImage(src)
+          replaceNodeWithVideo(src)
         }
       }
       reader.readAsDataURL(file)
@@ -107,7 +107,7 @@ const onDragLeave = () => {
       <input 
         ref="fileInput"
         type="file" 
-        accept="image/*" 
+        accept="video/*" 
         class="hidden" 
         @change="onFileChange"
       />
@@ -115,7 +115,7 @@ const onDragLeave = () => {
         <div class="w-full bg-zinc-800 rounded-full h-2 mb-3 mt-4 overflow-hidden border border-zinc-700/50">
           <div class="bg-indigo-500 h-2 rounded-full transition-all duration-300 ease-out" :style="{ width: `${uploadProgress}%` }"></div>
         </div>
-        <span class="upload-text-base text-zinc-100 text-sm font-medium">Uploading... {{ Math.round(uploadProgress) }}%</span>
+        <span class="upload-text-base text-zinc-100 text-sm font-medium">Uploading Video... {{ Math.round(uploadProgress) }}%</span>
       </div>
       <template v-else>
         <div class="relative mb-4">
@@ -125,14 +125,14 @@ const onDragLeave = () => {
             <div class="upload-fold absolute top-0 right-0 w-3 h-3 bg-[#111111] border-b border-l border-zinc-500/30 rounded-bl"></div>
           </div>
           <div class="upload-cloud-border absolute -bottom-2 -right-2 bg-indigo-600 rounded-full p-1.5 shadow-lg border-2 border-[#151515]">
-            <CloudUpload :size="12" class="text-white" stroke-width="3" />
+            <Film :size="12" class="text-white" stroke-width="3" />
           </div>
         </div>
         <div class="upload-text-muted text-zinc-300 text-[13px] font-medium mb-1">
-          <span class="upload-text-base underline decoration-indigo-400 underline-offset-4 decoration-1 text-zinc-100 cursor-pointer hover:text-white">Click to upload</span> or drag and drop
+          <span class="upload-text-base underline decoration-indigo-400 underline-offset-4 decoration-1 text-zinc-100 cursor-pointer hover:text-white">Click to upload video</span> or drag and drop
         </div>
         <div class="upload-text-muted text-zinc-500 text-[11px] font-medium">
-          Maximum 3 files, 5MB each.
+          Maximum 1 file, 100MB.
         </div>
       </template>
     </div>
@@ -140,25 +140,5 @@ const onDragLeave = () => {
 </template>
 
 <style>
-.light-wrapper .upload-block {
-  background-color: #f4f4f5 !important;
-}
-.light-wrapper .upload-block:hover {
-  background-color: #e4e4e7 !important;
-}
-.light-wrapper .upload-fold {
-  background-color: #ffffff !important;
-}
-.light-wrapper .upload-cloud-border {
-  border-color: #f4f4f5 !important;
-}
-.light-wrapper .upload-text-base {
-  color: #18181b !important;
-}
-.light-wrapper .upload-text-base:hover {
-  color: #000000 !important;
-}
-.light-wrapper .upload-text-muted {
-  color: #71717a !important;
-}
+/* 样式复用ImageUploadNode中的样式逻辑，所以保持一致即可。全局样式如果需要可以自己调节 */
 </style>
